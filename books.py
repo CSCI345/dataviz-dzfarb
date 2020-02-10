@@ -1,21 +1,17 @@
-import matplotlib.pyplot as plt; plt.rcdefaults()
 from collections import defaultdict
 import sys
 import string
 import os
 import numpy as np
-
-stopwords = set()
+import plotly.graph_objects as go
+from ipywidgets import interact_manual
+#import nbinteract as nbi
 
 punctuation = set(string.punctuation)
 dir = "booksdir"
 
 def parsefile(filename):
-    try:
-        file = open(filename, "r")
-    except FileNotFoundError:
-        print(filename, "is missing from your current directory")
-        sys.exit(-1) # quits the program
+    file = open(filename, "r")
     lines = file.readlines()
     file.close()
     return lines
@@ -31,7 +27,6 @@ def createMap(lines):
     return words
 
 if __name__ == "__main__":
-    inputword = "the"
 
     directory = os.fsencode(dir)
 
@@ -49,18 +44,17 @@ if __name__ == "__main__":
              words = createMap(lines)
              books[filename] = words
 
-    objects = tuple(books.keys())
+    book_titles = books.keys()
 
-    y_pos = np.arange(len(objects))
+    y_pos = np.arange(len(book_titles))
 
-    performance = []
-    for title in objects:
-        performance.append(books[title][inputword])
+    def update(word):
+        inputword = word
+        performance = []
+        for title in book_titles:
+            performance.append(books[title][inputword])
+        fig = go.Figure([go.Bar(x=book_titles, y=performance, name=inputword)])
+        fig.show()
+        return
 
-    #switch to plotly
-    plt.bar(y_pos, performance, align='center', alpha=0.5)
-    plt.xticks(y_pos, objects)
-    plt.ylabel('frequency')
-    plt.title('input word frequency in books')
-
-    plt.show()
+    interact_manual(update, word="type word here");
